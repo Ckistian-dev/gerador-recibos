@@ -5,379 +5,308 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Recibos - Ckistian Programando Soluções</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2ECC71; /* Verde */
-            --secondary-color: #34495E; /* Azul escuro */
-            --accent-color: #3498DB; /* Azul claro */
+            --brand-color: #22a4b6;
+            --dark-background: #151724;
+            --light-background: #f0f8ff;
+            --border-color: #cce7ef;
             --text-color: #333;
-            --background-color: #ECF0F1; /* Cinza claro */
-            --logo-blue: #22a4b6; /* Cor azul da sua logo */
-            --dark-background: #1e272e; /* Cor escura do fundo da sua logo */
-            --light-text: #f5f6fa; /* Texto claro para fundo escuro */
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--dark-background); /* Fundo escuro da logo */
-            color: var(--light-text); /* Texto claro */
+            background-color: var(--dark-background);
+            color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
         }
 
-        .container {
-            background-color: #2c3e50; /* Um pouco mais claro que o fundo para contraste */
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            width: 100%;
-            max-width: 600px;
-            margin-top: 20px;
-            box-sizing: border-box;
-        }
-
-        header {
-            width: 100%;
+        .instructions {
+            color: #f5f6fa;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        header img {
-            max-width: 300px;
+        .receipt-form {
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 25px 35px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.4);
+            box-sizing: border-box;
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header-main-logo {
+            width: 200px;
             height: auto;
+        }
+
+        .header-main-title {
+            font-size: 30px; /* --- AJUSTADO --- */
+            font-weight: 700;
+            color: var(--brand-color);
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .header-fields {
+            display: flex;
+            gap: 10px;
+        }
+        .header-fields .field {
+            display: flex;
+            flex-direction: column;
+        }
+        .header-fields label {
+            font-size: 12px; /* --- AJUSTADO --- */
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 3px;
+            padding-left: 5px;
+        }
+        .header-fields input {
+            background-color: var(--light-background);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 14px; /* --- AJUSTADO --- */
+            font-weight: 700;
+            text-align: right;
+        }
+        #receiptNo { width: 80px; }
+        #receiptValue { width: 120px; }
+
+        .form-row {
+            display: flex;
+            align-items: center;
             margin-bottom: 15px;
         }
-
-        h1 {
-            color: var(--light-text);
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 2em;
+        .form-row label {
+            flex: 0 0 150px;
+            font-size: 15px; /* --- PADRONIZADO --- */
+            color: #444;
         }
-
-        .form-group {
-            margin-bottom: 18px;
+        .form-row input, .form-row textarea {
+            flex-grow: 1;
+            border: none;
+            border-bottom: 1.5px dotted #999;
+            padding: 5px 0;
+            font-size: 15px; /* --- PADRONIZADO --- */
+            background: transparent;
+            font-family: 'Roboto', sans-serif; /* Garante a mesma fonte */
         }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: var(--logo-blue); /* Cor azul da sua logo para os labels */
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        textarea {
-            width: calc(100% - 20px);
-            padding: 12px;
-            border: 1px solid #444;
-            border-radius: 6px;
-            background-color: #3e5163; /* Fundo dos inputs */
-            color: var(--light-text);
-            font-size: 1em;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus,
-        textarea:focus {
-            border-color: var(--logo-blue);
+        .form-row input:focus, .form-row textarea:focus {
             outline: none;
+            border-bottom: 1.5px solid var(--brand-color);
         }
-
         textarea {
             resize: vertical;
-            min-height: 80px;
+        }
+        
+        .closing-row {
+            display: flex;
+            align-items: center;
+            margin-top: 25px;
+        }
+        .closing-row span {
+            font-size: 15px; /* --- PADRONIZADO --- */
+            color: #444;
+            padding: 5px 0;
+        }
+        .closing-row input {
+            border: none;
+            padding: 5px;
+            text-align: center;
+            font-size: 15px; /* --- PADRONIZADO --- */
+            font-family: 'Roboto', sans-serif; /* Garante a mesma fonte */
+            border-bottom: 1.5px dotted #999;
+
+        }
+        .closing-row input:focus {
+            outline: none;
+        }
+        #receiptCity { width: 200px; }
+        #receiptDate { flex-grow: 1; }
+        
+        .signature-area {
+            margin-top: 60px;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+        }
+        .signature-column {
+            flex: 1;
+            text-align: center;
+        }
+        .signature-line {
+            height: 40px;
+            border-bottom: 1.5px solid #333;
+            margin-bottom: 8px;
+        }
+        .signature-caption {
+            font-size: 12px; /* Mantido para captions */
+            color: #555;
+            line-height: 1.4;
         }
 
-        .button-group {
+        .button-container {
             text-align: center;
             margin-top: 30px;
         }
-
         button {
-            background-color: var(--logo-blue); /* Cor azul da sua logo para o botão */
+            background-color: var(--brand-color);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 15px 40px;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 18px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
         }
-
         button:hover {
-            background-color: #1a8e9e; /* Um pouco mais escuro no hover */
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            color: #888;
-            font-size: 0.9em;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin-top: 10px;
-            }
-            h1 {
-                font-size: 1.8em;
-            }
-            button {
-                padding: 12px 25px;
-                font-size: 1em;
-            }
+            background-color: #1a8e9e;
         }
     </style>
 </head>
 <body>
-    <header>
-        <img src="logo.png" alt="Ckistian Programando Soluções">
-    </header>
 
-    <div class="container">
+    <div class="instructions">
         <h1>Gerador de Recibos</h1>
+        <p>Preencha os campos e clique no botão para gerar um PDF idêntico ao formulário.</p>
+    </div>
 
-        <div class="form-group">
-            <label for="clientName">Nome do Cliente:</label>
-            <input type="text" id="clientName" placeholder="Nome completo do cliente" required>
+    <div id="receiptToCapture" class="receipt-form">
+        <div class="receipt-header">
+            <img src="logo.png" alt="Logo" class="header-main-logo">
+            <h2 class="header-main-title">RECIBO</h2>
+            <div class="header-fields">
+                <div class="field">
+                    <label for="receiptNo">Nº</label>
+                    <input type="text" id="receiptNo" value="001">
+                </div>
+                <div class="field">
+                    <label for="receiptValue">VALOR</label>
+                    <input type="text" id="receiptValue" placeholder="50,00" value="R$">
+                </div>
+            </div>
+        </div>
+        <div class="receipt-body">
+            <div class="form-row">
+                <label for="clientName">Recebido de</label>
+                <input type="text" id="clientName" placeholder="Nome do cliente">
+            </div>
+            <div class="form-row">
+                <label for="amountWords">A quantia de</label>
+                <input type="text" id="amountWords" placeholder="Cinquenta reais">
+            </div>
+            <div class="form-row">
+                <label for="serviceDesc">Correspondente a</label>
+                <input type="text" id="serviceDesc" placeholder="Serviço Prestado">
+            </div>
+            <div class="closing-row">
+                <span>E para clareza firmo o presente.</span>
+                <input type="text" id="receiptCity" value="Toledo">, 
+                <input type="text" id="receiptDate">
+                <span>de 2025.</span>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="clientDoc">CPF/CNPJ do Cliente (opcional):</label>
-            <input type="text" id="clientDoc" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-90">
-        </div>
-
-        <div class="form-group">
-            <label for="serviceDescription">Descrição do Serviço:</label>
-            <textarea id="serviceDescription" placeholder="Ex: Manutenção de ar condicionado. Descreva o serviço prestado." required>Manutenção de ar condicionado.</textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="amount">Valor (R$):</label>
-            <input type="number" id="amount" placeholder="50.00" step="0.01" value="50.00" required>
-        </div>
-
-        <div class="form-group">
-            <label for="city">Cidade:</label>
-            <input type="text" id="city" placeholder="Ex: São Paulo" required>
-        </div>
-
-        <div class="form-group">
-            <label for="date">Data:</label>
-            <input type="date" id="date" value="<?php echo date('Y-m-d'); ?>" required>
-        </div>
-
-        <div class="button-group">
-            <button onclick="generatePDF()">Gerar Recibo em PDF</button>
+        <div class="signature-area">
+            <div class="signature-column">
+                <div class="signature-line"></div>
+                <div class="signature-caption">Cliente</div>
+            </div>
+            <div class="signature-column">
+                <div class="signature-line"></div>
+                <div class="signature-caption">
+                    Ckistian Programando Soluções<br>
+                    58.414.763/0001-69
+                </div>
+            </div>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; <?php echo date('Y'); ?> Ckistian Programando Soluções. Todos os direitos reservados.</p>
-    </footer>
+    <div class="button-container">
+        <button onclick="generatePDF()">Gerar PDF com 2 Vias</button>
+    </div>
+
 
     <script>
         window.jsPDF = window.jspdf.jsPDF;
 
-        function numberToWords(n) {
-            const units = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
-            const teens = ["dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
-            const tens = ["", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
-            const hundreds = ["", "cem", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"];
-
-            function convertLessThanOneThousand(num) {
-                let s = "";
-                if (num >= 100) {
-                    s += hundreds[Math.floor(num / 100)];
-                    num %= 100;
-                    if (num > 0) s += " e ";
-                }
-                if (num >= 20 || num === 10) {
-                    s += tens[Math.floor(num / 10)];
-                    num %= 10;
-                    if (num > 0) s += " e ";
-                } else if (num > 0 && num < 20) {
-                    if (num >= 10) {
-                        s += teens[num - 10];
-                        num = 0;
-                    } else {
-                        s += units[num];
-                        num = 0;
-                    }
-                }
-                return s;
-            }
-
-            if (n === 0) return "zero";
-
-            let parts = [];
-            let integerPart = Math.floor(n);
-            let decimalPart = Math.round((n - integerPart) * 100);
-
-            let str = convertLessThanOneThousand(integerPart);
-            if (integerPart === 1) str = "um"; // Ajuste para "um real"
-
-            if (integerPart > 0) {
-                if (integerPart === 1) {
-                    parts.push(str + " real");
-                } else {
-                    parts.push(str + " reais");
-                }
-            }
-
-            if (decimalPart > 0) {
-                let centsStr = convertLessThanOneThousand(decimalPart);
-                if (decimalPart === 1) {
-                    parts.push(centsStr + " centavo");
-                } else {
-                    parts.push(centsStr + " centavos");
-                }
-            }
-
-            return parts.join(" e ");
-        }
-
-
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            document.getElementById('receiptDate').value = today.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+            
+            // Auto ajuste de altura para o campo 'Correspondente a'
+            const textarea = document.getElementById('serviceDesc');
+            textarea.addEventListener('input', () => {
+                textarea.style.height = 'auto';
+                textarea.style.height = (textarea.scrollHeight) + 'px';
+            });
+        });
+        
         async function generatePDF() {
+            const receiptElement = document.getElementById('receiptToCapture');
+            const button = document.querySelector('button');
+
+            button.disabled = true;
+            button.innerText = 'Gerando PDF...';
+
+            // Força o scroll para o topo para garantir a captura correta
+            window.scrollTo(0,0);
+
+            const canvas = await html2canvas(receiptElement, {
+                scale: 2,
+                useCORS: true,
+                windowWidth: receiptElement.scrollWidth,
+                windowHeight: receiptElement.scrollHeight
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            const imgWidth = pageWidth - 20;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+            const middle = pageHeight / 2;
+            doc.setLineDashPattern([2, 2], 0);
+            doc.line(10, middle, pageWidth - 10, middle);
+            
+            doc.addImage(imgData, 'PNG', 10, middle + 5, imgWidth, imgHeight);
+
+            const receiptNo = document.getElementById('receiptNo').value;
             const clientName = document.getElementById('clientName').value;
-            const clientDoc = document.getElementById('clientDoc').value;
-            const serviceDescription = document.getElementById('serviceDescription').value;
-            const amount = parseFloat(document.getElementById('amount').value).toFixed(2);
-            const city = document.getElementById('city').value;
-            const date = document.getElementById('date').value;
+            doc.save(`Recibo_${receiptNo}_${clientName.replace(/ /g, '_')}.pdf`);
 
-            if (!clientName || !serviceDescription || !amount || !city || !date) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return;
-            }
-
-            const doc = new jsPDF();
-
-            // Load logo image
-            const img = new Image();
-            img.src = 'logo.png'; // Make sure logo.png is in the same directory
-
-            await new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = () => {
-                    console.error("Erro ao carregar a imagem da logo. Certifique-se de que 'logo.png' está na mesma pasta.");
-                    resolve(); // Resolve anyway to proceed without logo
-                };
-            });
-
-            // Set document properties
-            doc.setProperties({
-                title: 'Recibo - Ckistian Programando Soluções',
-                subject: 'Recibo de Serviço',
-                author: 'Ckistian Programando Soluções',
-            });
-
-            const primaryColor = '#22a4b6'; // Azul da sua logo
-            const textColor = '#333333';
-            const lightTextColor = '#666666';
-
-            // Add Logo
-            if (img.complete && img.naturalHeight !== 0) { // Check if image loaded successfully
-                const imgWidth = 60;
-                const imgHeight = (img.naturalHeight * imgWidth) / img.naturalWidth;
-                doc.addImage(img, 'PNG', (doc.internal.pageSize.getWidth() - imgWidth) / 2, 15, imgWidth, imgHeight);
-            } else {
-                doc.setFontSize(20);
-                doc.setTextColor(primaryColor);
-                doc.text("Ckistian Programando Soluções", doc.internal.pageSize.getWidth() / 2, 35, { align: 'center' });
-            }
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(26);
-            doc.setTextColor(primaryColor);
-            doc.text("RECIBO DE PAGAMENTO", doc.internal.pageSize.getWidth() / 2, 70, { align: 'center' });
-
-            doc.setLineWidth(0.5);
-            doc.setDrawColor(primaryColor);
-            doc.line(20, 75, doc.internal.pageSize.getWidth() - 20, 75);
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-            doc.setTextColor(textColor);
-
-            let y = 90;
-
-            doc.setFont('helvetica', 'bold');
-            doc.text("RECEBEMOS DE:", 20, y);
-            y += 8;
-            doc.setFont('helvetica', 'normal');
-            doc.text(clientName, 20, y);
-            y += 6;
-            if (clientDoc) {
-                doc.text(`CPF/CNPJ: ${clientDoc}`, 20, y);
-                y += 6;
-            }
-
-            y += 10;
-            doc.setFont('helvetica', 'bold');
-            doc.text("VALOR TOTAL:", 20, y);
-            doc.setTextColor(primaryColor);
-            doc.setFontSize(18);
-            doc.text(`R$ ${amount.replace('.', ',')}`, 80, y, { align: 'right' }); // Ajuste para alinhar à direita
-
-            y += 10;
-            doc.setFontSize(12);
-            doc.setTextColor(textColor);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`(${numberToWords(parseFloat(amount))} reais)`, 20, y);
-
-            y += 15;
-            doc.setFont('helvetica', 'bold');
-            doc.text("REFERENTE A:", 20, y);
-            y += 8;
-            doc.setFont('helvetica', 'normal');
-            doc.text(serviceDescription, 20, y, { maxWidth: doc.internal.pageSize.getWidth() - 40 });
-
-            y += 20;
-            doc.setFont('helvetica', 'bold');
-            doc.text("PRESTADOR DE SERVIÇOS:", 20, y);
-            y += 8;
-            doc.setFont('helvetica', 'normal');
-            doc.text("Cristian Gabriel Kist", 20, y);
-            y += 6;
-            doc.text("Ckistian Programando Soluções", 20, y);
-            y += 6;
-            doc.text("CNPJ: 58.414.763/0001-69", 20, y);
-
-            // Date and City
-            y += 20;
-            doc.text(`${city}, ${new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}.`, 20, y);
-
-            // Signature line
-            y += 25;
-            doc.line(70, y, doc.internal.pageSize.getWidth() - 70, y);
-            y += 5;
-            doc.setFontSize(10);
-            doc.setTextColor(lightTextColor);
-            doc.text("Assinatura do Prestador", doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
-
-
-            doc.save(`Recibo-${clientName.replace(/ /g, '_')}-${date}.pdf`);
+            button.disabled = false;
+            button.innerText = 'Gerar PDF com 2 Vias';
         }
     </script>
 </body>
