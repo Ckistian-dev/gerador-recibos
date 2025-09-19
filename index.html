@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Recibos - Ckistian Programando Soluções</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2ECC71; /* Verde */
+            --secondary-color: #34495E; /* Azul escuro */
+            --accent-color: #3498DB; /* Azul claro */
+            --text-color: #333;
+            --background-color: #ECF0F1; /* Cinza claro */
+            --logo-blue: #22a4b6; /* Cor azul da sua logo */
+            --dark-background: #1e272e; /* Cor escura do fundo da sua logo */
+            --light-text: #f5f6fa; /* Texto claro para fundo escuro */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-background); /* Fundo escuro da logo */
+            color: var(--light-text); /* Texto claro */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #2c3e50; /* Um pouco mais claro que o fundo para contraste */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header img {
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--light-text);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--logo-blue); /* Cor azul da sua logo para os labels */
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea {
+            width: calc(100% - 20px);
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background-color: #3e5163; /* Fundo dos inputs */
+            color: var(--light-text);
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        textarea:focus {
+            border-color: var(--logo-blue);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: var(--logo-blue); /* Cor azul da sua logo para o botão */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #1a8e9e; /* Um pouco mais escuro no hover */
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin-top: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            button {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Ckistian Programando Soluções">
+    </header>
+
+    <div class="container">
+        <h1>Gerador de Recibos</h1>
+
+        <div class="form-group">
+            <label for="clientName">Nome do Cliente:</label>
+            <input type="text" id="clientName" placeholder="Nome completo do cliente" required>
+        </div>
+
+        <div class="form-group">
+            <label for="clientDoc">CPF/CNPJ do Cliente (opcional):</label>
+            <input type="text" id="clientDoc" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-90">
+        </div>
+
+        <div class="form-group">
+            <label for="serviceDescription">Descrição do Serviço:</label>
+            <textarea id="serviceDescription" placeholder="Ex: Manutenção de ar condicionado. Descreva o serviço prestado." required>Manutenção de ar condicionado.</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Valor (R$):</label>
+            <input type="number" id="amount" placeholder="50.00" step="0.01" value="50.00" required>
+        </div>
+
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" id="city" placeholder="Ex: São Paulo" required>
+        </div>
+
+        <div class="form-group">
+            <label for="date">Data:</label>
+            <input type="date" id="date" value="<?php echo date('Y-m-d'); ?>" required>
+        </div>
+
+        <div class="button-group">
+            <button onclick="generatePDF()">Gerar Recibo em PDF</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; <?php echo date('Y'); ?> Ckistian Programando Soluções. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        window.jsPDF = window.jspdf.jsPDF;
+
+        function numberToWords(n) {
+            const units = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
+            const teens = ["dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
+            const tens = ["", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
+            const hundreds = ["", "cem", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"];
+
+            function convertLessThanOneThousand(num) {
+                let s = "";
+                if (num >= 100) {
+                    s += hundreds[Math.floor(num / 100)];
+                    num %= 100;
+                    if (num > 0) s += " e ";
+                }
+                if (num >= 20 || num === 10) {
+                    s += tens[Math.floor(num / 10)];
+                    num %= 10;
+                    if (num > 0) s += " e ";
+                } else if (num > 0 && num < 20) {
+                    if (num >= 10) {
+                        s += teens[num - 10];
+                        num = 0;
+                    } else {
+                        s += units[num];
+                        num = 0;
+                    }
+                }
+                return s;
+            }
+
+            if (n === 0) return "zero";
+
+            let parts = [];
+            let integerPart = Math.floor(n);
+            let decimalPart = Math.round((n - integerPart) * 100);
+
+            let str = convertLessThanOneThousand(integerPart);
+            if (integerPart === 1) str = "um"; // Ajuste para "um real"
+
+            if (integerPart > 0) {
+                if (integerPart === 1) {
+                    parts.push(str + " real");
+                } else {
+                    parts.push(str + " reais");
+                }
+            }
+
+            if (decimalPart > 0) {
+                let centsStr = convertLessThanOneThousand(decimalPart);
+                if (decimalPart === 1) {
+                    parts.push(centsStr + " centavo");
+                } else {
+                    parts.push(centsStr + " centavos");
+                }
+            }
+
+            return parts.join(" e ");
+        }
+
+
+        async function generatePDF() {
+            const clientName = document.getElementById('clientName').value;
+            const clientDoc = document.getElementById('clientDoc').value;
+            const serviceDescription = document.getElementById('serviceDescription').value;
+            const amount = parseFloat(document.getElementById('amount').value).toFixed(2);
+            const city = document.getElementById('city').value;
+            const date = document.getElementById('date').value;
+
+            if (!clientName || !serviceDescription || !amount || !city || !date) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const doc = new jsPDF();
+
+            // Load logo image
+            const img = new Image();
+            img.src = 'logo.png'; // Make sure logo.png is in the same directory
+
+            await new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = () => {
+                    console.error("Erro ao carregar a imagem da logo. Certifique-se de que 'logo.png' está na mesma pasta.");
+                    resolve(); // Resolve anyway to proceed without logo
+                };
+            });
+
+            // Set document properties
+            doc.setProperties({
+                title: 'Recibo - Ckistian Programando Soluções',
+                subject: 'Recibo de Serviço',
+                author: 'Ckistian Programando Soluções',
+            });
+
+            const primaryColor = '#22a4b6'; // Azul da sua logo
+            const textColor = '#333333';
+            const lightTextColor = '#666666';
+
+            // Add Logo
+            if (img.complete && img.naturalHeight !== 0) { // Check if image loaded successfully
+                const imgWidth = 60;
+                const imgHeight = (img.naturalHeight * imgWidth) / img.naturalWidth;
+                doc.addImage(img, 'PNG', (doc.internal.pageSize.getWidth() - imgWidth) / 2, 15, imgWidth, imgHeight);
+            } else {
+                doc.setFontSize(20);
+                doc.setTextColor(primaryColor);
+                doc.text("Ckistian Programando Soluções", doc.internal.pageSize.getWidth() / 2, 35, { align: 'center' });
+            }
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(26);
+            doc.setTextColor(primaryColor);
+            doc.text("RECIBO DE PAGAMENTO", doc.internal.pageSize.getWidth() / 2, 70, { align: 'center' });
+
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(primaryColor);
+            doc.line(20, 75, doc.internal.pageSize.getWidth() - 20, 75);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.setTextColor(textColor);
+
+            let y = 90;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text("RECEBEMOS DE:", 20, y);
+            y += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(clientName, 20, y);
+            y += 6;
+            if (clientDoc) {
+                doc.text(`CPF/CNPJ: ${clientDoc}`, 20, y);
+                y += 6;
+            }
+
+            y += 10;
+            doc.setFont('helvetica', 'bold');
+            doc.text("VALOR TOTAL:", 20, y);
+            doc.setTextColor(primaryColor);
+            doc.setFontSize(18);
+            doc.text(`R$ ${amount.replace('.', ',')}`, 80, y, { align: 'right' }); // Ajuste para alinhar à direita
+
+            y += 10;
+            doc.setFontSize(12);
+            doc.setTextColor(textColor);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`(${numberToWords(parseFloat(amount))} reais)`, 20, y);
+
+            y += 15;
+            doc.setFont('helvetica', 'bold');
+            doc.text("REFERENTE A:", 20, y);
+            y += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text(serviceDescription, 20, y, { maxWidth: doc.internal.pageSize.getWidth() - 40 });
+
+            y += 20;
+            doc.setFont('helvetica', 'bold');
+            doc.text("PRESTADOR DE SERVIÇOS:", 20, y);
+            y += 8;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Cristian Gabriel Kist", 20, y);
+            y += 6;
+            doc.text("Ckistian Programando Soluções", 20, y);
+            y += 6;
+            doc.text("CNPJ: 58.414.763/0001-69", 20, y);
+
+            // Date and City
+            y += 20;
+            doc.text(`${city}, ${new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}.`, 20, y);
+
+            // Signature line
+            y += 25;
+            doc.line(70, y, doc.internal.pageSize.getWidth() - 70, y);
+            y += 5;
+            doc.setFontSize(10);
+            doc.setTextColor(lightTextColor);
+            doc.text("Assinatura do Prestador", doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
+
+
+            doc.save(`Recibo-${clientName.replace(/ /g, '_')}-${date}.pdf`);
+        }
+    </script>
+</body>
+</html>
